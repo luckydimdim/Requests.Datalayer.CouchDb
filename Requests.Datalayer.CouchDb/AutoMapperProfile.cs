@@ -9,7 +9,13 @@ namespace Cmas.DataLayers.CouchDb.Requests
         public AutoMapperProfile()
         {
             CreateMap<Request, RequestDto>();
-            CreateMap<RequestDto, Request>();
+            CreateMap<RequestDto, Request>()
+            .ForMember(
+                dest => dest.Id,
+                opt => opt.MapFrom(src => src._id))
+            .ForMember(
+                dest => dest.RevId,
+                opt => opt.MapFrom(src => src._rev));
         }
     }
 }

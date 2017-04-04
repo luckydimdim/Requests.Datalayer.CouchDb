@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -30,12 +31,14 @@ namespace Cmas.DataLayers.CouchDb.Requests.Queries
 
                 var viewResult = await client.Views.QueryAsync<RequestDto>(query);
 
+                if (!viewResult.IsSuccess)
+                {
+                    throw new Exception(viewResult.Error);
+                }
+
                 foreach (var row in viewResult.Rows.OrderByDescending(s => s.Value.CreatedAt))
                 {
-
-                    var request = _autoMapper.Map<Request>(row.Value);
-                    request.Id = row.Value._id;
-                    result.Add(request);
+                    result.Add(_autoMapper.Map<Request>(row.Value));
                 }
 
                 return result;

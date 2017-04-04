@@ -8,6 +8,7 @@ using Cmas.Infrastructure.Domain.Queries;
 using MyCouch;
 using CouchRequest = MyCouch.Requests;
 using Request = Cmas.BusinessLayers.Requests.Entities.Request;
+using System;
 
 namespace Cmas.DataLayers.CouchDb.Requests.Queries
 {
@@ -31,12 +32,14 @@ namespace Cmas.DataLayers.CouchDb.Requests.Queries
 
                 var viewResult = await client.Views.QueryAsync<RequestDto>(query);
 
+                if (!viewResult.IsSuccess)
+                {
+                    throw new Exception(viewResult.Error);
+                }
+
                 foreach (var row in viewResult.Rows.OrderByDescending(s => s.Value.CreatedAt))
                 {
-
-                    var order = _autoMapper.Map<Request>(row.Value);
-                    order.Id = row.Value._id;
-                    result.Add(order);
+                    result.Add(_autoMapper.Map<Request>(row.Value));
                 }
 
                 return result;

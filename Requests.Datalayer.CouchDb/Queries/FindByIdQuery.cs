@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Cmas.BusinessLayers.Requests.Entities;
 using Cmas.DataLayers.CouchDb.Requests.Dtos;
@@ -21,14 +22,14 @@ namespace Cmas.DataLayers.CouchDb.Requests.Queries
         {
             using (var client = new MyCouchClient(DbConsts.DbConnectionString, DbConsts.DbName))
             {
+                var result = await client.Entities.GetAsync<RequestDto>(criterion.Id);
 
-                var dto = await client.Entities.GetAsync<RequestDto>(criterion.Id);
+                if (!result.IsSuccess)
+                {
+                    throw new Exception(result.Error);
+                }
 
-                Request result = _autoMapper.Map<Request>(dto.Content);
-                result.Id = dto.Content._id;
-
-                return result;
- 
+                return _autoMapper.Map<Request>(result.Content);
             }
 
         }
