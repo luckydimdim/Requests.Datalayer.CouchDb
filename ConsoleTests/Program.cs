@@ -1,6 +1,10 @@
 ﻿using System;
 using AutoMapper;
 using Cmas.DataLayers.CouchDb.Requests;
+using System.Threading.Tasks;
+using Cmas.BusinessLayers.Requests.Entities;
+using Cmas.DataLayers.CouchDb.Requests.Queries;
+using Cmas.Infrastructure.Domain.Criteria;
 
 namespace ConsoleTests
 {
@@ -17,10 +21,10 @@ namespace ConsoleTests
                 });
 
                 _mapper = config.CreateMapper();
-                 
-                
-                //AllEntitiesTest().Wait();
-               
+
+
+                FindByIdQueryTest().Wait();
+
 
             }
             catch (Exception e)
@@ -32,6 +36,29 @@ namespace ConsoleTests
 
             Console.ReadKey();
         }
+
+        static async Task<bool> FindByIdQueryTest()
+        {
+            FindByIdQuery findByIdQuery = new FindByIdQuery(_mapper);
+            FindById criterion = new FindById("26270cfa2422b2c4ebf158285e0ccb73");
+            Request result = null;
+
+            try
+            {
+                result = await findByIdQuery.Ask(criterion);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+
+            Console.WriteLine(result.Id);
+
+            return true;
+        }
+
+
 
     }
 }

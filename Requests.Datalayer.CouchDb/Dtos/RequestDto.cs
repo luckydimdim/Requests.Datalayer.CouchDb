@@ -38,7 +38,7 @@ namespace Cmas.DataLayers.CouchDb.Requests.Dtos
         /// <summary>
         /// Статус заявки
         /// </summary>
-        public int RequestStatus;
+        public int Status;
     }
 
 }
