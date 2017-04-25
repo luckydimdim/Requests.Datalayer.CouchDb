@@ -1,47 +1,41 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
-using MyCouch;
 using Cmas.BusinessLayers.Requests.CommandsContexts;
 using Cmas.Infrastructure.Domain.Commands;
 using Cmas.DataLayers.CouchDb.Requests.Dtos;
+using Cmas.DataLayers.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace Cmas.DataLayers.CouchDb.Requests.Commands
 {
- 
     public class UpdateRequestCommand : ICommand<UpdateRequestCommandContext>
     {
-
         private IMapper _autoMapper;
+        private readonly ILogger _logger;
+        private readonly CouchWrapper _couchWrapper;
 
-        public UpdateRequestCommand(IMapper autoMapper)
+        public UpdateRequestCommand(IMapper autoMapper, ILoggerFactory loggerFactory)
         {
             _autoMapper = autoMapper;
+            _logger = loggerFactory.CreateLogger<UpdateRequestCommand>();
+            _couchWrapper = new CouchWrapper(DbConsts.DbConnectionString, DbConsts.DbName, _logger);
         }
 
         public async Task<UpdateRequestCommandContext> Execute(UpdateRequestCommandContext commandContext)
         {
-            using (var client = new MyCouchClient(DbConsts.DbConnectionString, DbConsts.DbName))
+            // FIXME: нельзя так делать, надо от frontend получать Rev
+            var header = await _couchWrapper.GetHeaderAsync(commandContext.Request.Id);
+
+            var entity = _autoMapper.Map<RequestDto>(commandContext.Request);
+
+            entity._rev = header.Rev;
+
+            var result = await _couchWrapper.GetResponseAsync(async (client) =>
             {
-                // FIXME: нельзя так делать, надо от frontend получать
-                var existingDoc = (await client.Entities.GetAsync<RequestDto>(commandContext.Request.Id)).Content;
- 
-                var newDto = _autoMapper.Map<RequestDto>(commandContext.Request);
-                newDto._id = existingDoc._id;
-                newDto._rev = existingDoc._rev;
+                return await client.Entities.PutAsync(entity._id, entity);
+            });
 
-                var result = await client.Entities.PutAsync(newDto._id, newDto);
-
-                if (!result.IsSuccess)
-                {
-                    throw new Exception(result.Error);
-                }
-
-                // TODO: возвращать _revid
-
-                return commandContext;
-            }
-
+            return commandContext; // TODO: возвращать _revid
         }
     }
 }

@@ -1,44 +1,38 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
 using Cmas.BusinessLayers.Requests.CommandsContexts;
 using Cmas.DataLayers.CouchDb.Requests.Dtos;
+using Cmas.DataLayers.Infrastructure;
 using Cmas.Infrastructure.Domain.Commands;
-using MyCouch;
+using Microsoft.Extensions.Logging;
 
 namespace Cmas.DataLayers.CouchDb.Requests.Commands
 {
     public class CreateRequestCommand : ICommand<CreateRequestCommandContext>
     {
         private IMapper _autoMapper;
+        private readonly ILogger _logger;
+        private readonly CouchWrapper _couchWrapper;
 
-        public CreateRequestCommand(IMapper autoMapper)
+        public CreateRequestCommand(IMapper autoMapper, ILoggerFactory loggerFactory)
         {
             _autoMapper = autoMapper;
+            _logger = loggerFactory.CreateLogger<CreateRequestCommand>();
+            _couchWrapper = new CouchWrapper(DbConsts.DbConnectionString, DbConsts.DbName, _logger);
         }
 
         public async Task<CreateRequestCommandContext> Execute(CreateRequestCommandContext commandContext)
         {
-            using (var store = new MyCouchStore(DbConsts.DbConnectionString, DbConsts.DbName))
+            var doc = _autoMapper.Map<RequestDto>(commandContext.Request);
+
+            var result = await _couchWrapper.GetResponseAsync(async (client) =>
             {
-                var doc = _autoMapper.Map<RequestDto>(commandContext.Request);
+                return await client.Entities.PostAsync(doc);
+            });
 
-                doc._id = null;
-                doc._rev = null;
+            commandContext.Id = result.Id;
 
-                var result = await store.Client.Entities.PostAsync(doc);
-
-                if (!result.IsSuccess)
-                {
-                    throw new Exception(result.Error);
-                }
-
-                commandContext.Id = result.Id;
-
-
-                return commandContext;
-            }
-
+            return commandContext;
         }
     }
 }

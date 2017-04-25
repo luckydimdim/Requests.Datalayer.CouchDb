@@ -9,7 +9,11 @@ namespace Cmas.DataLayers.CouchDb.Requests
     {
         public AutoMapperProfile()
         {
-            CreateMap<Request, RequestDto>();
+            CreateMap<Request, RequestDto>()
+                .ForMember(
+                    dest => dest._id,
+                    opt => opt.MapFrom(src => src.Id));
+
             CreateMap<RequestDto, Request>()
                 .ForMember(
                     dest => dest.Id,
@@ -18,8 +22,9 @@ namespace Cmas.DataLayers.CouchDb.Requests
                     dest => dest.RevId,
                     opt => opt.MapFrom(src => src._rev));
 
-            CreateMap<RequestStatus, int>().ConvertUsing(src => (int)src);
-            CreateMap<int, RequestStatus>().ConvertUsing(src => (RequestStatus)Enum.Parse(typeof(RequestStatus),src.ToString()));
+            CreateMap<RequestStatus, int>().ConvertUsing(src => (int) src);
+            CreateMap<int, RequestStatus>()
+                .ConvertUsing(src => (RequestStatus) Enum.Parse(typeof(RequestStatus), src.ToString()));
         }
     }
 }
