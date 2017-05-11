@@ -29,5 +29,10 @@
         /// Имя представления документов, сгрупированных по ID договора
         /// </summary>
         public const string ByContractDocsViewName = "byContract";
+
+        /// <summary>
+        /// Имя представления документов, сгрупированных по ID табеля
+        /// </summary>
+        public const string ByTimeSheetDocsViewName = "byTimeSheet";
     }
 }
