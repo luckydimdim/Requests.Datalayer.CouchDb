@@ -2,19 +2,17 @@
 using Cmas.Infrastructure.Domain.Commands;
 using Cmas.BusinessLayers.Requests.CommandsContexts;
 using Cmas.DataLayers.Infrastructure;
-using Microsoft.Extensions.Logging;
+using System;
 
 namespace Cmas.DataLayers.CouchDb.Requests.Commands
 {
     public class DeleteRequestCommand : ICommand<DeleteRequestCommandContext>
     {
-        private readonly ILogger _logger;
         private readonly CouchWrapper _couchWrapper;
 
-        public DeleteRequestCommand(ILoggerFactory loggerFactory)
+        public DeleteRequestCommand(IServiceProvider serviceProvider)
         {
-            _logger = loggerFactory.CreateLogger<DeleteRequestCommand>();
-            _couchWrapper = new CouchWrapper(DbConsts.DbConnectionString, DbConsts.DbName, _logger);
+            _couchWrapper = new CouchWrapper(serviceProvider, DbConsts.ServiceName);
         }
 
         public async Task<DeleteRequestCommandContext> Execute(DeleteRequestCommandContext commandContext)

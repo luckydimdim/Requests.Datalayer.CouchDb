@@ -6,23 +6,22 @@ using Cmas.DataLayers.CouchDb.Requests.Dtos;
 using Cmas.DataLayers.Infrastructure;
 using Cmas.Infrastructure.Domain.Criteria;
 using Cmas.Infrastructure.Domain.Queries;
-using Microsoft.Extensions.Logging;
 using Cmas.BusinessLayers.Requests.Entities;
 using couchREquests = MyCouch.Requests;
+using System;
 
 namespace Cmas.DataLayers.CouchDb.Requests.Queries
 {
     public class AllEntitiesQuery : IQuery<AllEntities, Task<IEnumerable<Request>>>
     {
-        private IMapper _autoMapper;
-        private readonly ILogger _logger;
+        private readonly IMapper _autoMapper;
         private readonly CouchWrapper _couchWrapper;
 
-        public AllEntitiesQuery(IMapper autoMapper, ILoggerFactory loggerFactory)
+        public AllEntitiesQuery(IServiceProvider serviceProvider)
         {
-            _autoMapper = autoMapper;
-            _logger = loggerFactory.CreateLogger<AllEntitiesQuery>();
-            _couchWrapper = new CouchWrapper(DbConsts.DbConnectionString, DbConsts.DbName, _logger);
+            _autoMapper = (IMapper)serviceProvider.GetService(typeof(IMapper));
+
+            _couchWrapper = new CouchWrapper(serviceProvider, DbConsts.ServiceName);
         }
 
         public async Task<IEnumerable<Request>> Ask(AllEntities criterion)
