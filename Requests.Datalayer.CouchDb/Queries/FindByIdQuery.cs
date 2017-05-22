@@ -29,6 +29,9 @@ namespace Cmas.DataLayers.CouchDb.Requests.Queries
                 return await client.Entities.GetAsync<RequestDto>(criterion.Id);
             });
 
+            if (result == null)
+                return null;
+
             return _autoMapper.Map<Request>(result.Content);
         }
     }
