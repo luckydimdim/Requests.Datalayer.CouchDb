@@ -11,6 +11,11 @@ namespace Cmas.DataLayers.CouchDb.Requests.Dtos
         public String _id;
 
         /// <summary>
+        /// Счетчик, аналог ID. 
+        /// </summary>
+        public string Counter;
+
+        /// <summary>
         ///
         /// </summary>
         public String _rev;
