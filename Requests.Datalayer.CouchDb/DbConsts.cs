@@ -28,6 +28,6 @@
         /// <summary>
         /// Имя представления документов, сгрупированных по ID табеля
         /// </summary>
-        public const string ByTimeSheetDocsViewName = "byTimeSheet";
+        public const string ByCallOffOrderIdDocsViewName = "byCallOffOrderId";
     }
 }
